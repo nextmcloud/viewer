@@ -65,15 +65,6 @@
 		@next="next">
 		<!-- ACTIONS -->
 		<template #actions>
-			<!-- Inline items -->
-			<NcActionButton v-if="canEdit"
-				:close-after-click="true"
-				@click="onEdit">
-				<template #icon>
-					<Pencil :size="20" />
-				</template>
-				{{ t('viewer', 'Edit') }}
-			</NcActionButton>
 			<!-- Menu items -->
 			<NcActionButton v-if="Sidebar && sidebarOpenFilePath && !isSidebarShown"
 				:close-after-click="true"
