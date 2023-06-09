@@ -1,0 +1,191 @@
+
+@import 'functions';
+
+#viewer {
+	#collaboraframe {
+		width: 100% !important;
+	}
+	.richEditor {
+		.action-item__menutoggle--default-icon {
+			@include unset('filter',true);
+			background-position: center !important;
+		}
+	}
+	border-top: 4px solid var(--magenta-color) !important;
+
+	.modal-header {
+		position: relative;
+		height: 63px;
+		background: #191919;
+		justify-content: space-between;
+
+		.action-item__menutoggle--default-icon {
+			filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(148deg) brightness(105%) contrast(101%);
+			min-width: 24px;
+			min-height: 24px;
+			height: 24px;
+			padding: 0 !important;
+			opacity: 1 !important;
+		}
+	}
+	.modal-wrapper {
+		border-top: 1px solid #e5e5e5;
+		.material-design-icon__svg {
+			display: none;
+		}
+	}
+	.action-item.header-actions {
+		padding: 0 !important;
+		margin: 0 !important;
+		margin-right: 1.5rem !important;
+	}
+	.action-item.action-item--single.header-close {
+		@include unset('background-image',true);
+		width: 24px;
+		min-width: 24px;
+		height: 24px;
+		padding: 0;
+		margin: 0;
+		margin-right: 1rem;
+		background: none;
+	}
+	.play-pause-icons {
+		position: fixed;
+		left: 49.8%;
+		top: 0;
+		height: 70px;
+	}
+	iframe {
+		top: 2rem !important;
+		width: 85% !important;
+	}
+	.viewer__content {
+		margin-top: 1rem;
+	}
+
+	#editor-container {
+		top: 64px !important;
+	}
+	.plyr {
+		audio {
+			width: inherit !important;
+		}
+		iframe {
+			width: inherit !important;
+		}
+		video {
+			width: inherit !important;
+		}
+	}
+	.action-item__menutoggle--default-icon {
+		background: none;
+	}
+	.play-icon {
+		.material-design-icon__svg {
+			display: none;
+		}
+	}
+}
+
+.richEditor {
+	.action-item__menutoggle.icon-table_settings {
+		margin-top: 0.75rem !important;
+	}
+}
+#viewer[view="application/pdf"],#viewer[view="text/markdown"] {
+	button.prev {
+		visibility: hidden !important;
+	}
+	button.next {
+		visibility: hidden !important;
+	}
+}
+
+.icons-menu.button-vue.button-vue--icon-only.button-vue--vue-tertiary.action-item.action-item--single.v-popper--has-tooltip {
+	display: none !important;
+}
+
+.modal-header {
+	.modal-title {
+		font-size: 1rem !important;
+		width: auto !important;
+		padding: 0 !important;
+		margin-left: 1rem;
+		text-align: left !important;
+	}
+}
+
+.popover {
+	.action-link {
+		align-items: center !important;
+	}
+}
+
+iframe.viewer__file {
+	width: inherit !important;
+}
+
+.modal-mask {
+	.play-pause-icons {
+		.progress-ring {
+			top: 10px !important;
+			left: 0px !important;
+		}
+	}
+}
+
+#content.app-files_sharing.mobile-content.content-translation {
+	top: 120px !important;
+}
+
+
+button {
+
+	&.prev,&.next {
+		position: fixed !important;
+		top: 0 !important;
+		left: 44.5% !important;
+		height: 70px !important;
+		opacity: .7;
+		z-index: 99999 !important;
+		margin: 0 2rem;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+
+	&.next{
+		right: 42.5% !important;
+		@include unset('left',true);
+		&:hover {
+			opacity: 1;
+		}
+	 }
+
+	& > span{
+		background-repeat: no-repeat;
+	 }
+
+	&.prev >span{
+		background-image: url(../img/icons/prev-icon-white.svg) !important;
+	 }
+
+	&.next >span{
+		background-image: url(../img/icons/next-icon-white.svg) !important;
+	}
+
+	& span.play-icon {
+		background-image: url(../img/icons/play-icon-white.svg) !important;
+		background-repeat: no-repeat;
+	}
+
+	&:active{
+		@include unset('background-color',true);
+	}
+}
+
+
+.action-item.action-item--open{
+	@include unset('background-color',false);
+}
