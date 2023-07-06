@@ -1,7 +1,0 @@
-@mixin unset($property, $override) {
-	@if($override){
-		#{$property}:unset!important;
-	} @else {
-		#{$property}:unset ;
-	}
-}

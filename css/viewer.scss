@@ -1,13 +1,10 @@
-
-@import 'functions';
-
 #viewer {
 	#collaboraframe {
 		width: 100% !important;
 	}
 	.richEditor {
 		.action-item__menutoggle--default-icon {
-			@include unset('filter',true);
+			filter: unset !important;
 			background-position: center !important;
 		}
 	}
@@ -40,7 +37,7 @@
 		margin-right: 1.5rem !important;
 	}
 	.action-item.action-item--single.header-close {
-		@include unset('background-image',true);
+		background-image: unset !important;
 		width: 24px;
 		min-width: 24px;
 		height: 24px;
@@ -157,7 +154,7 @@ button {
 
 	&.next{
 		right: 42.5% !important;
-		@include unset('left',true);
+		left: unset !important;
 		&:hover {
 			opacity: 1;
 		}
@@ -181,11 +178,41 @@ button {
 	}
 
 	&:active{
-		@include unset('background-color',true);
+		background-color: unset !important;
 	}
 }
 
 
 .action-item.action-item--open{
-	@include unset('background-color',false);
+	background-color: unset;
+}
+
+#files-public-content #imgframe {
+    max-width: 42%;
+	max-height: calc(100vh - 280px) !important;
+}
+
+#files-public-content #preview #imgframe #viewer {
+	border-top: none !important;
+}
+
+#files-public-content #imgframe {
+    max-width: 42%;
+	max-height: calc(100vh - 280px) !important;
+}
+
+#files-public-content #preview #imgframe #viewer {
+	border-top: none !important;
+}
+
+@media screen and (max-width: 768px) {
+	#files-public-content #imgframe {
+		max-width: 100% !important;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	#files-public-content #imgframe {
+		max-width: 100% !important;
+	}
 }

@@ -66,12 +66,6 @@
 		<!-- ACTIONS -->
 		<template #actions>
 			<!-- Menu items -->
-			<NcActionButton v-if="Sidebar && sidebarOpenFilePath && !isSidebarShown"
-				:close-after-click="true"
-				icon="icon-menu-sidebar"
-				@click="showSidebar">
-				{{ t('viewer', 'Open sidebar') }}
-			</NcActionButton>
 			<NcActionLink v-if="canDownload"
 				:download="currentFile.basename"
 				:close-after-click="true"
