@@ -76,6 +76,7 @@
 			</NcActionButton>
 			<!-- Menu items -->
 			<NcActionButton v-if="Sidebar && sidebarOpenFilePath && !isSidebarShown"
+				id="viewer-sidebar-btn"
 				:close-after-click="true"
 				icon="icon-menu-sidebar"
 				@click="showSidebar">
