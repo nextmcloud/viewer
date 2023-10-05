@@ -21,8 +21,8 @@ on:
       branch:
         type: choice
         description: Branch to build a package from
-        options: 
-          - main
+        options:
+          - master
           - stable25
           - stable26
           - stable27
