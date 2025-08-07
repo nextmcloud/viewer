@@ -1,30 +1,12 @@
 <!--
- - @copyright Copyright (c) 2019 John Molakvoæ <skjnldsv@protonmail.com>
- -
- - @author John Molakvoæ <skjnldsv@protonmail.com>
- - @author Richard Steinmetz <richard@steinmetz.cloud>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
+  - SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 
 <template>
 	<!-- Plyr currently replaces the parent. Wrapping to prevent this
 	https://github.com/redxtech/vue-plyr/issues/259 -->
-	<div v-if="src">
+	<div v-if="url">
 		<VuePlyr ref="plyr"
 			:options="options"
 			:style="{
@@ -35,8 +17,9 @@
 				:autoplay="active ? true : null"
 				:playsinline="true"
 				:poster="livePhotoPath"
-				:src="src"
+				:src="url"
 				preload="metadata"
+				@error.capture.prevent.stop.once="onFail"
 				@ended="donePlaying"
 				@canplay="doneLoading"
 				@loadedmetadata="onLoadedMetadata">
@@ -53,17 +36,24 @@
 	</div>
 </template>
 
-<script>
+<script lang='ts'>
 // eslint-disable-next-line n/no-missing-import
+import Vue from 'vue'
+import AsyncComputed from 'vue-async-computed'
 import '@skjnldsv/vue-plyr/dist/vue-plyr.css'
-import logger from '../services/logger.js'
+
 import { imagePath } from '@nextcloud/router'
+
+import logger from '../services/logger.js'
+import { findLivePhotoPeerFromName } from '../utils/livePhotoUtils'
+import { getPreviewIfAny } from '../utils/previewUtils'
+import { preloadMedia } from '../services/mediaPreloader.js'
 
 const VuePlyr = () => import(/* webpackChunkName: 'plyr' */'@skjnldsv/vue-plyr')
 
-const liveExt = ['jpg', 'jpeg', 'png']
-const liveExtRegex = new RegExp(`\\.(${liveExt.join('|')})$`, 'i')
 const blankVideo = imagePath('viewer', 'blank.mp4')
+
+Vue.use(AsyncComputed)
 
 export default {
 	name: 'Videos',
@@ -74,20 +64,19 @@ export default {
 	data() {
 		return {
 			isFullscreenButtonVisible: false,
+			fallback: false,
 		}
 	},
 
 	computed: {
-		livePhoto() {
-			return this.fileList.find(file => {
-				// if same filename and extension is allowed
-				return file.filename !== this.filename
-					&& file.basename.startsWith(this.name)
-					&& liveExtRegex.test(file.basename)
-			})
-		},
 		livePhotoPath() {
-			return this.livePhoto && this.getPreviewIfAny(this.livePhoto)
+			const peerFile = findLivePhotoPeerFromName(this, this.fileList)
+
+			if (peerFile === undefined) {
+				return undefined
+			}
+
+			return getPreviewIfAny(peerFile)
 		},
 		player() {
 			return this.$refs.plyr.player
@@ -99,6 +88,19 @@ export default {
 				blankVideo,
 				controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'fullscreen'],
 				loadSprite: false,
+				fullscreen: {
+					iosNative: true,
+				},
+			}
+		},
+	},
+
+	asyncComputed: {
+		async url(): Promise<string> {
+			if (this.fallback) {
+				return preloadMedia(this.filename)
+			} else {
+				return this.src
 			}
 		},
 	},
@@ -115,12 +117,16 @@ export default {
 			}
 		},
 	},
+
 	// for some reason the video controls don't get mounted to the dom until after the component (Videos) is mounted,
 	// using the mounted() hook will leave us with an empty array
-
 	updated() {
 		// Prevent swiping to the next/previous item when scrubbing the timeline or changing volume
-		[...this.$el.querySelectorAll('.plyr__controls__item')].forEach(control => {
+		const plyrControls = this.$el.querySelectorAll('.plyr__controls__item')
+		if (!plyrControls || !plyrControls.length) {
+			return
+		}
+		[...plyrControls].forEach(control => {
 			if (control.getAttribute('data-plyr') === 'fullscreen') {
 				control.addEventListener('click', this.hideHeaderAndFooter)
 			}
@@ -135,13 +141,13 @@ export default {
 	beforeDestroy() {
 		// Force stop any ongoing request
 		logger.debug('Closing video stream', { filename: this.filename })
-		this.$refs.video.pause()
+		this.$refs.video?.pause?.()
 		this.player.stop()
 		this.player.destroy()
 	},
 
 	methods: {
-		hideHeaderAndFooter(e) {
+		hideHeaderAndFooter() {
 			// work arround to get the state of the fullscreen button, aria-selected attribute is not reliable
 			this.isFullscreenButtonVisible = !this.isFullscreenButtonVisible
 			if (this.isFullscreenButtonVisible) {
@@ -170,6 +176,14 @@ export default {
 			// Force any further loading once we have the metadata
 			if (!this.active) {
 				this.player.stop()
+			}
+		},
+
+		// Fallback to the original image if not already done
+		onFail() {
+			if (!this.fallback) {
+				console.error(`Loading of file ${this.filename} failed, falling back to fetching it by hand`)
+				this.fallback = true
 			}
 		},
 	},

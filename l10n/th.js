@@ -1,6 +1,7 @@
 OC.L10N.register(
     "viewer",
     {
+    "Cancel" : "ยกเลิก",
     "Edit" : "แก้ไข",
     "Open sidebar" : "เปิดแถบด้านข้าง",
     "Download" : "ดาวน์โหลด",
@@ -10,12 +11,14 @@ OC.L10N.register(
     "Save" : "บันทึก",
     "Back" : "ย้อนกลับ",
     "Reset" : "รีเซ็ต",
-    "Cancel" : "ยกเลิก",
-    "Continue" : "ดำเนินการต่อ",
+    "Apply" : "นำไปใช้",
+    "Warning" : "คำเตือน",
+    "Confirm" : "ยืนยัน",
     "Undo" : "เลิกทำ",
     "Custom" : "กำหนดเอง",
     "Text" : "ข้อความ",
     "Size" : "ขนาด",
-    "Position" : "ตำแหน่ง"
+    "Position" : "ตำแหน่ง",
+    "Menu" : "เมนู"
 },
 "nplurals=1; plural=0;");

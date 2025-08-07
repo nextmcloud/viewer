@@ -1,23 +1,6 @@
 /**
- * @copyright Copyright (c) 2019 John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @author John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @license AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 describe('See shared folder with link share', function() {
@@ -69,7 +52,7 @@ describe('See shared folder with link share', function() {
 	})
 
 	it('Open the viewer on file click', function() {
-		cy.openFileInShare('image1.jpg')
+		cy.openFile('image1.jpg')
 		cy.get('body > .viewer').should('be.visible')
 	})
 
@@ -81,7 +64,7 @@ describe('See shared folder with link share', function() {
 	})
 
 	it('See the menu icon and title on the viewer header', function() {
-		cy.get('body > .viewer .modal-name').should('contain', 'image1.jpg')
+		cy.get('body > .viewer .modal-header__name').should('contain', 'image1.jpg')
 		cy.get('body > .viewer .modal-header button.header-close').should('be.visible')
 	})
 
@@ -141,7 +124,7 @@ describe('See shared folder with link share', function() {
 		cy.get('body > .viewer .modal-container video').should('have.length', 1)
 		cy.get('body > .viewer button.prev').should('be.visible')
 		cy.get('body > .viewer button.next').should('be.visible')
-		cy.get('body > .viewer .modal-name').should('contain', 'video1.mp4')
+		cy.get('body > .viewer .modal-header__name').should('contain', 'video1.mp4')
 	})
 
 	it('Does not see a loading animation', function() {

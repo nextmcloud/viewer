@@ -1,7 +1,7 @@
 OC.L10N.register(
     "viewer",
     {
-    "Unsaved changes" : "Cambios no guardados",
+    "Cancel" : "Cancelar",
     "Edit" : "Editar",
     "Download" : "Descargar",
     "Delete" : "Borrar",
@@ -9,13 +9,15 @@ OC.L10N.register(
     "Save" : "Guardar",
     "Back" : "Atrás",
     "Reset" : "Restablecer",
-    "Cancel" : "Cancelar",
-    "Continue" : "Continuar",
+    "Apply" : "Aplicar",
+    "Warning" : "Advertencia",
+    "Confirm" : "Confirmar",
     "Undo" : "Deshacer",
     "Custom" : "Personalizado",
     "Value" : "Valor",
     "Text" : "Texto",
     "Size" : "Tamaño",
-    "Position" : "Posición"
+    "Position" : "Posición",
+    "Menu" : "Menú"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

@@ -1,12 +1,16 @@
+<!--
+  - SPDX-FileCopyrightText: 2022 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 <template>
 	<div ref="editor" class="viewer__image-editor" v-bind="themeDataAttr" />
 </template>
 <script>
 import { basename, dirname, extname, join } from 'path'
 import { emit } from '@nextcloud/event-bus'
-import { showError, showSuccess } from '@nextcloud/dialogs'
-import axios from '@nextcloud/axios'
 import { Node } from '@nextcloud/files'
+import { showError, showSuccess, DialogBuilder } from '@nextcloud/dialogs'
+import axios from '@nextcloud/axios'
 
 import logger from '../services/logger.js'
 import translations from '../models/editorTranslations.js'
@@ -35,6 +39,7 @@ export default {
 	data() {
 		return {
 			imageEditor: null,
+			observer: null,
 		}
 	},
 
@@ -72,16 +77,16 @@ export default {
 					palette: {
 						'bg-secondary': 'var(--color-main-background)',
 						'bg-primary': 'var(--color-background-dark)',
+						'bg-hover': 'var(--color-background-hover)',
+						'bg-stateless': 'var(--color-background-dark)',
 						// Accent
 						'accent-primary': 'var(--color-primary-element)',
-						// Use by the slider
+						'accent-stateless': 'var(--color-primary-element)',
 						'border-active-bottom': 'var(--color-primary-element)',
-						'icons-primary': 'var(--color-main-text)',
 						// Active state
 						'bg-primary-active': 'var(--color-background-dark)',
 						'bg-primary-hover': 'var(--color-background-hover)',
 						'accent-primary-active': 'var(--color-main-text)',
-						// Used by the save button
 						'accent-primary-hover': 'var(--color-primary-element)',
 
 						warning: 'var(--color-error)',
@@ -129,7 +134,23 @@ export default {
 		)
 		this.imageEditor.render()
 		window.addEventListener('keydown', this.handleKeydown, true)
-		window.addEventListener('DOMNodeInserted', this.handleSfxModal)
+
+		this.observer = new MutationObserver((mutations) => {
+			mutations.forEach((mutation) => {
+				if (mutation.type === 'childList') {
+					mutation.addedNodes.forEach((node) => {
+						if (node.classList.contains('FIE_root') || node.classList.contains('SfxModal-Wrapper')) {
+							emit('viewer:trapElements:changed', node)
+						}
+					})
+				}
+			})
+		})
+		// using body instead of the editor ref because save modal is not mounted in editor
+		this.observer.observe(document.body, {
+			childList: true,
+			subtree: true,
+		})
 
 	},
 
@@ -137,19 +158,32 @@ export default {
 		if (this.imageEditor) {
 			this.imageEditor.terminate()
 		}
+		this.observer.disconnect()
 		window.removeEventListener('keydown', this.handleKeydown, true)
 	},
 
 	methods: {
-		onClose(closingReason, haveNotSavedChanges) {
-			if (haveNotSavedChanges) {
-				this.onExitWithoutSaving()
-				return
-			}
+		onClose() {
 			window.removeEventListener('keydown', this.handleKeydown, true)
 			this.$emit('close')
 		},
-
+		/**
+		 * Check if a file exists at the given URL
+		 * @param {string} url The URL to check
+		 * @return {Promise<boolean>} True if the file exists, false otherwise
+		 */
+		 async fileExists(url) {
+			try {
+				await axios.head(url, { validateStatus: status => status === 200 || status === 404 })
+				const response = await axios.head(url)
+				return response.status === 200
+			} catch (error) {
+				if (error.response?.status === 404) {
+					return false
+				}
+				throw error
+			}
+		},
 		/**
 		 * User saved the image
 		 *
@@ -165,6 +199,51 @@ export default {
 			const putUrl = origin + join(dirname(pathname), fullName)
 			logger.debug('Saving image...', { putUrl, src: this.src, fullName })
 
+			const fileExists = await this.fileExists(putUrl)
+			logger.debug('File exists', { fileExists })
+			if (fileExists) {
+				logger.debug('File exists, showing confirmation dialog')
+				try {
+					const isOriginal = fullName === basename(this.src)
+					const message = isOriginal
+						? t('viewer', 'You are about to overwrite the original file. Are you sure you want to continue?')
+						: t('viewer', 'A file with this name already exists. Do you want to overwrite it?')
+
+					let confirmed = false
+					const dialog = (new DialogBuilder())
+						.setName(t('viewer', 'Confirm overwrite'))
+						.setText(message)
+						.setButtons([
+							{
+								label: t('viewer', 'Cancel'),
+								type: 'secondary',
+								callback: () => {
+									confirmed = false
+								},
+							},
+							{
+								label: t('viewer', 'Overwrite'),
+								type: 'error',
+								callback: () => {
+									confirmed = true
+								},
+							},
+						])
+						.build()
+
+					await dialog.show()
+
+					if (!confirmed) {
+						logger.debug('User cancelled overwrite')
+						return
+					}
+				} catch (error) {
+					logger.error('Error showing confirmation dialog', { error })
+					showError(t('viewer', 'An error occurred while trying to confirm the file overwrite.'))
+					return
+				}
+			}
+
 			// toBlob is not very smart...
 			mimeType = mimeType.replace('jpg', 'jpeg')
 
@@ -174,11 +253,16 @@ export default {
 			try {
 				const blob = await new Promise(resolve => imageCanvas.toBlob(resolve, mimeType, quality))
 				const response = await axios.put(putUrl, new File([blob], fullName))
-
 				logger.info('Edited image saved!', { response })
 				showSuccess(t('viewer', 'Image saved'))
 				if (putUrl !== this.src) {
-					emit('files:node:created', { fileid: parseInt(response?.headers?.['oc-fileid']?.split('oc')[0]) || null })
+					const fileId = parseInt(response?.headers?.['oc-fileid']?.split('oc')[0]) || null
+					emit('editor:file:created', putUrl)
+					if (fileId) {
+						const newParams = window.OCP.Files.Router.params
+						newParams.fileId = fileId
+						window.OCP.Files.Router.goToRoute(null, newParams, window.OCP.Files.Router.query)
+					}
 				} else {
 					this.$emit('updated')
 					const updatedFile = await rawStat(origin, decodeURI(pathname))
@@ -200,28 +284,6 @@ export default {
 				logger.error('Error saving image', { error })
 				showError(t('viewer', 'Error saving image'))
 			}
-		},
-
-		/**
-		 * Show warning if unsaved changes
-		 */
-		onExitWithoutSaving() {
-			OC.dialogs.confirmDestructive(
-				translations.changesLoseConfirmation + '\n\n' + translations.changesLoseConfirmationHint,
-				t('viewer', 'Unsaved changes'),
-				{
-					type: OC.dialogs.YES_NO_BUTTONS,
-					confirm: t('viewer', 'Drop changes'),
-					confirmClasses: 'error',
-					cancel: translations.cancel,
-				},
-				(decision) => {
-					if (!decision) {
-						return
-					}
-					this.onClose('warning-ignored', false)
-				},
-			)
 		},
 
 		// Key Handlers, override default Viewer arrow and escape key
@@ -251,17 +313,6 @@ export default {
 			}
 		},
 
-		/**
-		 * Watch out for Modal inject in document root
-		 * That way we can adjust the focusTrap
-		 *
-		 * @param {Event} event Dom insertion event
-		 */
-		handleSfxModal(event) {
-			if (event.target?.classList && event.target.classList.contains('SfxModal-Wrapper')) {
-				emit('viewer:trapElements:changed', event.target)
-			}
-		},
 	},
 }
 </script>
@@ -418,6 +469,10 @@ export default {
 	margin-left: 6px !important;
 }
 
+.FIE_tabs_toggle_btn{
+	display: none !important;
+}
+
 // Tabs
 .FIE_tabs {
 	padding: 6px !important;
@@ -551,15 +606,6 @@ export default {
 			stroke: var(--color-main-text);
 			fill: var(--color-main-text);
 		}
-	}
-}
-
-// Close editor button fixes
-.FIE_topbar-close-button {
-	svg path {
-		// The path viewbox is weird and
-		// not correct, this fixes it
-		transform: scale(1.6);
 	}
 }
 

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "viewer",
     {
+    "Cancel" : "Sefsex",
     "Edit" : "Ẓreg",
     "Download" : "Sider",
     "Delete" : "Kkes",
@@ -8,8 +9,8 @@ OC.L10N.register(
     "Save" : "Sekles",
     "Back" : "Retour",
     "Loading …" : "Asali ...",
-    "Cancel" : "Sefsex",
-    "Continue" : "Continuer",
+    "Warning" : "Alɣu",
+    "Confirm" : "Serggeg",
     "Size" : "Teɣzi"
 },
 "nplurals=2; plural=(n != 1);");

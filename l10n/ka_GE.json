@@ -1,5 +1,5 @@
 { "translations": {
-    "Unsaved changes" : "შეუნახავი ცვლილებები",
+    "Cancel" : "უარყოფა",
     "Edit" : "შეცვლა",
     "Download" : "ჩამოტვირთვა",
     "Delete" : "წაშლა",
@@ -7,13 +7,15 @@
     "Save" : "შენახვა",
     "Back" : "უკან",
     "Reset" : "საწყის მდოგმარეობაში დაბრუნება",
-    "Cancel" : "უარყოფა",
-    "Continue" : "გაგრძელება",
+    "Apply" : "გამოყენება",
+    "Warning" : "გაფრთხილება",
+    "Confirm" : "დადასტურება",
     "Undo" : "დაბრუნება",
     "Custom" : "ინდივიდუალური",
     "Value" : "მნიშვნელობა",
     "Text" : "ტექსტი",
     "Size" : "ზომა",
-    "Position" : "პოზიცია"
+    "Position" : "პოზიცია",
+    "Menu" : "მენიუ"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

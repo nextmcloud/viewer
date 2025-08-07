@@ -1,4 +1,10 @@
+<!--
+  - SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 # Files viewer for nextcloud
+
+[![REUSE status](https://api.reuse.software/badge/github.com/nextcloud/viewer)](https://api.reuse.software/info/github.com/nextcloud/viewer)
 
 Show your latest holiday photos and videos like in the movies. Show a glimpse of your latest novel directly from your nextcloud. Choose the best GIF of your collection thanks to the direct view of your favorites files!
 
@@ -11,8 +17,7 @@ Show your latest holiday photos and videos like in the movies. Show a glimpse of
 ## 🏗 Development setup
 1. ☁ Clone this app into the `apps` folder of your Nextcloud: `git clone https://github.com/nextcloud/viewer.git`
 2. 👩‍💻 In the folder of the app, install dependencies with `npm ci` and build the Javascript with `npm run build`.
-3. ✅ Enable the app through the app management of your Nextcloud
-4. 🎉 Partytime!
+3. 🎉 Partytime!
 
 ### 🧙 Advanced development stuff
 To build the Javascript whenever you make changes, you can also run `npm run dev` for development builds.

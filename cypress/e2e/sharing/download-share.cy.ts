@@ -1,23 +1,6 @@
 /**
- * @copyright Copyright (c) 2020 Florent Fayolle <florent@zeteo.me>
- *
- * @author Florent Fayolle <florent@zeteo.me>
- *
- * @license AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ * SPDX-FileCopyrightText: 2020 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import * as path from 'path'
@@ -67,7 +50,7 @@ describe(`Download ${fileName} from viewer in link share`, function() {
 	})
 
 	it('Open the viewer on file click', function() {
-		cy.openFileInShare('image1.jpg')
+		cy.openFile('image1.jpg')
 		cy.get('body > .viewer').should('be.visible')
 	})
 
@@ -79,7 +62,7 @@ describe(`Download ${fileName} from viewer in link share`, function() {
 	})
 
 	it('See the title and the close icon on the viewer header', function() {
-		cy.get('body > .viewer .modal-name').should('contain', 'image1.jpg')
+		cy.get('body > .viewer .modal-header__name').should('contain', 'image1.jpg')
 		cy.get('body > .viewer .modal-header button.header-close').should('be.visible')
 	})
 
@@ -89,14 +72,14 @@ describe(`Download ${fileName} from viewer in link share`, function() {
 
 	it('See the full screen and download icons in the menu', function() {
 		cy.get('body > .v-popper__popper ul span.fullscreen-icon').should('be.visible')
-		cy.get(`body > .v-popper__popper ul a.action-link[href*='/s/${token}/download']`).should('be.visible')
+		cy.get(`body > .v-popper__popper ul a.action-link[href*='/public.php/dav/files/${token}/image1.jpg']`).should('be.visible')
 	})
 
 	it('Download the image', function() {
 		// https://github.com/cypress-io/cypress/issues/14857
 		cy.window().then((win) => { setTimeout(() => { win.location.reload() }, 5000) })
 		// download the file
-		cy.get(`body > .v-popper__popper a.action-link[href*='/s/${token}/download']`).click()
+		cy.get(`body > .v-popper__popper ul a.action-link[href*='/public.php/dav/files/${token}/image1.jpg']`).click()
 	})
 
 	it('Compare downloaded file with asset by size', function() {

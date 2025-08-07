@@ -1,4 +1,5 @@
 { "translations": {
+    "Cancel" : "Ofbriechen",
     "Edit" : "Änneren",
     "Download" : "Eroflueden",
     "Delete" : "Läschen",
@@ -6,9 +7,11 @@
     "Save" : "Späicheren",
     "Back" : "Zeréck",
     "Reset" : "Zeréck setzen",
-    "Cancel" : "Ofbriechen",
-    "Continue" : "Weider",
+    "Apply" : "Uwenden",
+    "Warning" : "Warnung",
+    "Confirm" : "Konfirméieren",
     "Custom" : "Individualiséier",
-    "Size" : "Gréisst"
+    "Size" : "Gréisst",
+    "Menu" : "Menü"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

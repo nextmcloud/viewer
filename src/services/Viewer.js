@@ -1,28 +1,12 @@
 /**
- * @copyright Copyright (c) 2019 John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @author John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @license AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import Images from '../models/images.js'
 import Videos from '../models/videos.js'
 import Audios from '../models/audios.js'
+import logger from './logger.js'
 
 /**
  * Handler type definition
@@ -40,8 +24,8 @@ import Audios from '../models/audios.js'
  * File info type definition
  *
  * @typedef {object} Fileinfo
- * @property {string} filename the file name
- * @property {string} basename the full path of the file
+ * @property {string} filename File path of the remote item
+ * @property {string} basename Base filename of the remote item, no path
  * @property {?string} source absolute path of a non-dav file, e.g. a static resource or provided by an app route
  * @property {string} mime file MIME type in the format type/sub-type
  * @property {string} [previewUrl] URL of the file preview
@@ -78,7 +62,7 @@ export default class Viewer {
 		this.registerHandler(Videos)
 		this.registerHandler(Audios)
 
-		console.debug('OCA.Viewer initialized')
+		logger.debug('OCA.Viewer initialized')
 	}
 
 	/**
@@ -99,14 +83,42 @@ export default class Viewer {
 	 * @param {Handler} handler a new unregistered handler
 	 */
 	registerHandler(handler) {
+		const error = this.validateHandler(handler)
+		if (error) {
+			logger.error('Could not register handler', { error, handler })
+			return
+		}
+
 		this._state.handlers.push(handler)
 		const handledMimes = [
 			...handler.mimes,
-			...Object.keys(handler.mimesAliases || {})
+			...Object.keys(handler.mimesAliases || {}),
 		]
 		this._mimetypes.push.apply(this._mimetypes, handledMimes)
 		if (handler?.canCompare === true) {
 			this._mimetypesCompare.push.apply(this._mimetypesCompare, handledMimes)
+		}
+	}
+
+	validateHandler({ id, mimes, mimesAliases, component }) {
+		// checking valid handler id
+		if (!id || id.trim() === '' || typeof id !== 'string') {
+			return 'The handler doesn\'t have a valid id'
+		}
+
+		// checking if handler is not already registered
+		if (this._state.handlers.find(h => h.id === id)) {
+			return 'The handler is already registered'
+		}
+
+		// Nothing available to process! Failure
+		if (!(mimes && Array.isArray(mimes)) && !mimesAliases) {
+			return 'Handler needs a valid mime array or mimesAliases'
+		}
+
+		// checking valid handler component data
+		if ((!component || (typeof component !== 'object' && typeof component !== 'function'))) {
+			return 'The handler doesn\'t have a valid component'
 		}
 	}
 
@@ -303,6 +315,7 @@ export default class Viewer {
 		} else {
 			this._state.fileInfo = fileInfo
 		}
+
 		if (!this._state.el) {
 			this._state.files = list
 			this._state.enableSidebar = enableSidebar

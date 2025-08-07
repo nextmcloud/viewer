@@ -1,23 +1,6 @@
 /**
- * @copyright Copyright (c) 2020 John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @author John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @license AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ * SPDX-FileCopyrightText: 2020 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 describe('Open custom images list in viewer', function() {
@@ -95,7 +78,7 @@ describe('Open custom images list in viewer', function() {
 	})
 
 	it('See the menu icon and title on the viewer header', function() {
-		cy.get('body > .viewer .modal-name').should('contain', 'image1.jpg')
+		cy.get('body > .viewer .modal-header__name').should('contain', 'image1.jpg')
 		cy.get('body > .viewer .modal-header button.action-item__menutoggle').should('be.visible')
 		cy.get('body > .viewer .modal-header button.header-close').should('be.visible')
 	})
@@ -108,7 +91,7 @@ describe('Open custom images list in viewer', function() {
 	})
 
 	it('The image source is the preview url', function() {
-		cy.get('body > .viewer .modal-container img.viewer__file.viewer__file--active')
+		cy.get('body > .viewer .modal-container .viewer__file.viewer__file--active img')
 			.should('have.attr', 'src')
 			.and('contain', '/index.php/core/preview')
 	})
@@ -128,13 +111,13 @@ describe('Open custom images list in viewer', function() {
 	})
 
 	it('The image source is the preview url', function() {
-		cy.get('body > .viewer .modal-container img.viewer__file.viewer__file--active')
+		cy.get('body > .viewer .modal-container .viewer__file.viewer__file--active img')
 			.should('have.attr', 'src')
 			.and('contain', '/index.php/core/preview')
 	})
 
 	it('See the menu icon and title on the viewer header', function() {
-		cy.get('body > .viewer .modal-name').should('contain', 'image3.jpg')
+		cy.get('body > .viewer .modal-header__name').should('contain', 'image3.jpg')
 		cy.get('body > .viewer .modal-header button.action-item__menutoggle').should('be.visible')
 		cy.get('body > .viewer .modal-header button.header-close').should('be.visible')
 	})
@@ -147,7 +130,7 @@ describe('Open custom images list in viewer', function() {
 	})
 
 	it('The image source is the preview url', function() {
-		cy.get('body > .viewer .modal-container img.viewer__file.viewer__file--active')
+		cy.get('body > .viewer .modal-container .viewer__file.viewer__file--active img')
 			.should('have.attr', 'src')
 			.and('contain', '/index.php/core/preview')
 	})
@@ -160,13 +143,13 @@ describe('Open custom images list in viewer', function() {
 	})
 
 	it('See the menu icon and title on the viewer header', function() {
-		cy.get('body > .viewer .modal-name').should('contain', 'image1.jpg')
+		cy.get('body > .viewer .modal-header__name').should('contain', 'image1.jpg')
 		cy.get('body > .viewer .modal-header button.action-item__menutoggle').should('be.visible')
 		cy.get('body > .viewer .modal-header button.header-close').should('be.visible')
 	})
 
 	it('The image source is the preview url', function() {
-		cy.get('body > .viewer .modal-container img.viewer__file.viewer__file--active')
+		cy.get('body > .viewer .modal-container .viewer__file.viewer__file--active img')
 			.should('have.attr', 'src')
 			.and('contain', '/index.php/core/preview')
 	})

@@ -1,8 +1,8 @@
 OC.L10N.register(
     "viewer",
     {
+    "Cancel" : "Anullo",
     "Image saved" : "Imazhi u ruajt",
-    "Unsaved changes" : "Ndryshime të paruajtura",
     "Edit" : "Përpuno",
     "Open sidebar" : "Hapni sidebar-in",
     "Download" : "Shkarko",
@@ -12,8 +12,9 @@ OC.L10N.register(
     "Save" : "Ruaj",
     "Back" : "Prapa",
     "Reset" : "Rivendos",
-    "Cancel" : "Anullo",
-    "Continue" : "Vazhdo",
+    "Apply" : "Apliko",
+    "Warning" : "Kujdes",
+    "Confirm" : "Konfirmo",
     "Undo" : "Ktheje pas",
     "Redo" : "Ribëj",
     "Custom" : "E përshtatur",
@@ -21,6 +22,7 @@ OC.L10N.register(
     "Text" : "Tekst",
     "Size" : "Madhësi",
     "Position" : "Pozicion",
-    "Name is required." : "Emri është i domosdoshëm"
+    "Name is required." : "Emri është i domosdoshëm",
+    "Menu" : "Menu"
 },
 "nplurals=2; plural=(n != 1);");

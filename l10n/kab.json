@@ -1,4 +1,5 @@
 { "translations": {
+    "Cancel" : "Sefsex",
     "Edit" : "Ẓreg",
     "Download" : "Sider",
     "Delete" : "Kkes",
@@ -6,8 +7,8 @@
     "Save" : "Sekles",
     "Back" : "Retour",
     "Loading …" : "Asali ...",
-    "Cancel" : "Sefsex",
-    "Continue" : "Continuer",
+    "Warning" : "Alɣu",
+    "Confirm" : "Serggeg",
     "Size" : "Teɣzi"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

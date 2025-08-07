@@ -1,4 +1,5 @@
 { "translations": {
+    "Cancel" : "Avbryt",
     "Edit" : "Rediger",
     "Open sidebar" : "Opne sidestolpe",
     "Download" : "Last ned",
@@ -6,8 +7,8 @@
     "Name" : "Namn",
     "Save" : "Lagre",
     "Back" : "Tilbake",
-    "Cancel" : "Avbryt",
-    "Continue" : "Gå vidare",
+    "Apply" : "Anvend",
+    "Warning" : "Åtvaring",
     "Value" : "Verdi",
     "Size" : "Storleik"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

@@ -1,41 +1,64 @@
 /**
- * @copyright Copyright (c) 2019 John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @author John Molakvoæ <skjnldsv@protonmail.com>
- *
- * @license AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
+ * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { FileStat } from 'webdav'
-import { dirname, encodePath } from '@nextcloud/paths'
-import { generateUrl } from '@nextcloud/router'
+
+import { davRemoteURL, davRootPath } from '@nextcloud/files'
+import { getLanguage } from '@nextcloud/l10n'
+import { encodePath } from '@nextcloud/paths'
+import { getCurrentUser } from '@nextcloud/auth'
 import camelcase from 'camelcase'
 
-import { getRootPath, getToken, getUserRoot, isPublic } from './davUtils'
 import { isNumber } from './numberUtil'
 
-declare const OC: Nextcloud.v27.OC
+export interface FileInfo {
+	/** ID of the file (not unique if shared, use source instead) */
+	fileid?: number
+	/** Filename (name with path) */
+	filename: string
+	/** Basename of the file */
+	basename: string
+	/** DAV source URL */
+	source: string
+	/** File size in bytes */
+	size: number
+	/** E-Tag */
+	etag?: string
+	/** MIME type */
+	mime?: string
+	/** Last modification date */
+	lastmod?: string
+	/** File is marked as favorite */
+	isFavorite?: boolean
+	/** File type */
+	type: 'directory'|'file'
+	/** Attributes for file shares */
+	shareAttributes?: string|Array<{value:boolean|string|number|null|object|Array<unknown>, key: string, scope: string}>
+	/** Share hidden state since Nextcloud 31 */
+	hideDownload?: boolean
+
+	// custom attributes not fetch from API
+
+	/** Does the file has an existing preview */
+	hasPreview?: boolean
+	/** URL of the preview image */
+	previewUrl?: string
+	/** The id of the peer live photo */
+	metadataFilesLivePhoto?: number
+	/** The absolute dav path */
+	davPath?: string
+	/** filename without extension */
+	name?: string
+}
 
 /**
  * Extract dir and name from file path
  *
- * @param {string} path the full path
- * @return {string[]} [dirPath, fileName]
+ * @param path the full path
+ * @return [dirPath, fileName]
  */
-const extractFilePaths = function(path) {
+export function extractFilePaths(path: string): [string, string] {
 	const pathSections = path.split('/')
 	const fileName = pathSections[pathSections.length - 1]
 	const dirPath = pathSections.slice(0, pathSections.length - 1).join('/')
@@ -43,15 +66,32 @@ const extractFilePaths = function(path) {
 }
 
 /**
+ * Extract path from source
+ *
+ * @param source the full source URL
+ * @return path
+ */
+export function extractFilePathFromSource(source: string): string {
+	const uid = getCurrentUser()?.uid
+
+	if (uid) {
+		const path = source.split(`${uid}/`)[1]
+		if (path) {
+			return path
+		}
+	}
+	throw new Error(`Invalid source URL: ${source}. Unable to extract file paths.`)
+}
+
+/**
  * Sorting comparison function
  *
- * @param {object} fileInfo1 file 1 fileinfo
- * @param {object} fileInfo2 file 2 fileinfo
- * @param {string} key key to sort with
- * @param {boolean} [asc] sort ascending?
- * @return {number}
+ * @param fileInfo1 file 1 FileInfo
+ * @param fileInfo2 file 2 FileInfo
+ * @param key key to sort with
+ * @param asc sort ascending (default true)
  */
-const sortCompare = function(fileInfo1, fileInfo2, key, asc = true) {
+export function sortCompare(fileInfo1: FileInfo, fileInfo2: FileInfo, key: string, asc = true): number {
 
 	if (fileInfo1.isFavorite && !fileInfo2.isFavorite) {
 		return -1
@@ -61,7 +101,8 @@ const sortCompare = function(fileInfo1, fileInfo2, key, asc = true) {
 
 	// if this is a number, let's sort by integer
 	if (isNumber(fileInfo1[key]) && isNumber(fileInfo2[key])) {
-		return Number(fileInfo1[key]) - Number(fileInfo2[key])
+		const result = Number(fileInfo1[key]) - Number(fileInfo2[key])
+		return asc ? result : -result
 	}
 
 	// else we sort by string, so let's sort directories first
@@ -70,21 +111,23 @@ const sortCompare = function(fileInfo1, fileInfo2, key, asc = true) {
 	} else if (fileInfo1.type !== 'directory' && fileInfo2.type === 'directory') {
 		return 1
 	}
-
+	// sort by date if key is lastmod
+	if (key === 'lastmod') {
+		const result = new Date(fileInfo1.lastmod ?? 0).getTime() - new Date(fileInfo2.lastmod ?? 0).getTime()
+		return asc ? -result : result
+	}
 	// finally sort by name
 	return asc
-		? fileInfo1[key].localeCompare(fileInfo2[key], OC.getLanguage())
-		: -fileInfo1[key].localeCompare(fileInfo2[key], OC.getLanguage())
+		? fileInfo1[key].toString()?.localeCompare(fileInfo2[key].toString(), getLanguage(), { numeric: true })
+		: -fileInfo1[key].toString()?.localeCompare(fileInfo2[key].toString(), getLanguage(), { numeric: true })
 }
 
-export type FileInfo = object
-
 /**
- * Generate a fileinfo object based on the full dav properties
+ * Generate a FileInfo object based on the full dav properties
  * It will flatten everything and put all keys to camelCase
- * @param obj
+ * @param obj The stat response to convert
  */
-const genFileInfo = function(obj: FileStat): FileInfo {
+export function genFileInfo(obj: FileStat): FileInfo {
 	const fileInfo = {}
 
 	Object.keys(obj).forEach(key => {
@@ -100,44 +143,42 @@ const genFileInfo = function(obj: FileStat): FileInfo {
 			} else if (data === 'true') {
 				fileInfo[camelcase(key)] = true
 			} else {
+				// preserve string typed properties as string (FileStat interface in webdav)
+				const stringTypedProperties = ['filename', 'basename']
+				if (stringTypedProperties.includes(key)) {
+					fileInfo[camelcase(key)] = data
+					return
+				}
 				fileInfo[camelcase(key)] = isNumber(data)
 					? Number(data)
 					: data
 			}
 		}
 	})
-	return fileInfo
+
+	return fileInfo as FileInfo
 }
 
 /**
  * Generate absolute dav remote path of the file
  *
- * @param {object} fileInfo The fileInfo
- * @param {string} fileInfo.filename the file full path
- * @param {string} fileInfo.basename the file name
- * @param {string} fileInfo.source the file source if any
- * @return {string}
+ * @param fileInfo The fileInfo
+ * @param fileInfo.filename the file full path
+ * @param fileInfo.source the file source if any
  */
-const getDavPath = function({ filename, basename, source = '' }: {filename: string, basename: string, source: string}) {
-	// TODO: allow proper dav access without the need of basic auth
-	// https://github.com/nextcloud/server/issues/19700
-	if (isPublic()) {
-		return generateUrl(`/s/${getToken()}/download?path={dirname}&files={basename}`,
-			{ dirname: dirname(filename), basename })
+export function getDavPath({ filename, source = '' }: { filename: string, source?: string }): string|null {
+	if (!filename || typeof filename !== 'string') {
+		return null
 	}
 
-	const prefixUser = getUserRoot()
-
 	// If we have a source but we're not a dav resource, return null
-	if (source && !source.includes(prefixUser)) {
+	if (source && !source.includes(davRootPath)) {
 		return null
 	}
 
 	// Workaround for files with different root like /remote.php/dav
-	if (filename.startsWith(prefixUser)) {
-		filename = filename.slice(prefixUser.length)
+	if (!filename.startsWith(davRootPath)) {
+		filename = `${davRootPath}${filename}`
 	}
-	return getRootPath() + encodePath(filename)
+	return davRemoteURL + encodePath(filename)
 }
-
-export { extractFilePaths, sortCompare, genFileInfo, getDavPath }

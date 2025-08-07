@@ -1,6 +1,7 @@
 OC.L10N.register(
     "viewer",
     {
+    "Cancel" : "Ofbriechen",
     "Edit" : "Änneren",
     "Download" : "Eroflueden",
     "Delete" : "Läschen",
@@ -8,9 +9,11 @@ OC.L10N.register(
     "Save" : "Späicheren",
     "Back" : "Zeréck",
     "Reset" : "Zeréck setzen",
-    "Cancel" : "Ofbriechen",
-    "Continue" : "Weider",
+    "Apply" : "Uwenden",
+    "Warning" : "Warnung",
+    "Confirm" : "Konfirméieren",
     "Custom" : "Individualiséier",
-    "Size" : "Gréisst"
+    "Size" : "Gréisst",
+    "Menu" : "Menü"
 },
 "nplurals=2; plural=(n != 1);");
