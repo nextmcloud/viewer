@@ -13,7 +13,7 @@
     <bugs>https://github.com/nextcloud/viewer</bugs>
 	<screenshot>https://raw.githubusercontent.com/nextcloud/screenshots/master/apps/Viewer/viewer.png</screenshot>
     <dependencies>
-        <nextcloud min-version="29" max-version="29" />
+        <nextcloud min-version="29" max-version="30" />
     </dependencies>
     <default_enable />
 </info>
